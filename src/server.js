@@ -10,6 +10,7 @@ import { createMetrics } from './metrics.js';
 import { createManagement } from './management.js';
 import { createPlayers } from './players.js';
 import { readWorldSeed } from './seed.js';
+import { bedrockNetwork } from './network.js';
 export { calculateMetrics } from './metrics.js';
 
 export function validateConfig(input) {
@@ -128,6 +129,7 @@ export function createApp({ docker = new Docker({ socketPath: process.env.DOCKER
     try {
       if (req.body.eula !== true) throw new Error('Debes aceptar la EULA de Minecraft.');
       const settings = validateConfig(req.body);
+      const network = bedrockNetwork(settings);
       if (await inspect()) throw new Error('Ya existe un servidor instalado.');
       await docker.ping();
       await fs.mkdir(dataDir, { recursive: true });
@@ -146,9 +148,9 @@ export function createApp({ docker = new Docker({ socketPath: process.env.DOCKER
           const created = await docker.createContainer({
             name: containerName, Image: 'itzg/minecraft-bedrock-server:latest', Tty: true, OpenStdin: true,
             Labels: { 'bedrock-panel.managed': 'true' },
-            Env: ['EULA=TRUE', `SERVER_NAME=${settings.name}`, `LEVEL_NAME=${settings.world}`, `GAMEMODE=${settings.gamemode}`, `DIFFICULTY=${settings.difficulty}`, `MAX_PLAYERS=${settings.maxPlayers}`, `ALLOW_LIST=${settings.allowlist}`, 'ONLINE_MODE=true', 'ENABLE_SSH=false'],
-            ExposedPorts: { '19132/udp': {} },
-            HostConfig: { Binds: [`${volumeName}:/data`], PortBindings: { '19132/udp': [{ HostPort: String(settings.port) }] }, Memory: settings.memoryMB * 1024 * 1024, RestartPolicy: { Name: 'unless-stopped' } }
+            Env: ['EULA=TRUE', `SERVER_NAME=${settings.name}`, `LEVEL_NAME=${settings.world}`, `GAMEMODE=${settings.gamemode}`, `DIFFICULTY=${settings.difficulty}`, `MAX_PLAYERS=${settings.maxPlayers}`, `ALLOW_LIST=${settings.allowlist}`, 'ONLINE_MODE=true', 'ENABLE_SSH=false', ...network.Env],
+            ExposedPorts: network.ExposedPorts,
+            HostConfig: { Binds: [`${volumeName}:/data`], PortBindings: network.PortBindings, Memory: settings.memoryMB * 1024 * 1024, RestartPolicy: { Name: 'unless-stopped' } }
           });
           await created.start();
           job.status = 'done'; job.message = 'Contenedor iniciado. Consulta la consola mientras Bedrock prepara el mundo.';
@@ -157,6 +159,7 @@ export function createApp({ docker = new Docker({ socketPath: process.env.DOCKER
       })();
     } catch (e) { busy = false; next(e); }
   });
+  app.post('/api/network/migrate', background('Actualizando red de Bedrock…', () => management.migrateNetwork()));
   app.post('/api/power', mutate(async (req, res) => {
     if (!['start', 'stop', 'restart'].includes(req.body.action)) throw new Error('Acción inválida.');
     const info = await inspect();

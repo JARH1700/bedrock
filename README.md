@@ -6,7 +6,7 @@ Panel independiente para administrar Minecraft Bedrock. URL configurada: **https
 
 - Servidor Linux con Docker Engine y Docker Compose v2, Git y acceso a Internet.
 - Registro DNS A de `minecraft.pr4do.cloud` apuntando a la IP pública del servidor. Si tienes AAAA, debe apuntar también a este servidor con IPv6 operativo. Para conexión directa, configura el registro en modo solo DNS si usas un proveedor con proxy.
-- Puertos **80/TCP y 443/TCP** disponibles en el host y abiertos en firewall/router. **443/UDP** es opcional para HTTP/3. El juego usa **19132/UDP** por defecto: ábrelo también.
+- Puertos **80/TCP y 443/TCP** disponibles en el host y abiertos en firewall/router. **443/UDP** es opcional para HTTP/3. Bedrock NetherNet usa **19132/TCP** y **19140–19239/UDP**: abre estos puertos también.
 - Si hay otro proxy ocupando 80/443, libera esos puertos antes de iniciar este Compose. No detengas servicios ajenos sin revisar qué alojan.
 
 ## Instalar
@@ -73,3 +73,24 @@ pnpm test
 ```
 
 El motor WebAssembly viene compilado; su fuente y licencia están incluidas. El Seed Finder es experimental, con perfiles hasta Bedrock 1.21.60 y estructuras previstas. No garantiza coincidencia con todas las estructuras ni con versiones posteriores.
+
+## Actualizar un Bedrock existente a NetherNet
+
+La imagen actual usa NetherNet. Publicar únicamente UDP 19132 ya no basta. La instalación nueva configura TCP y el rango UDP automáticamente. Para un servidor que ya existe:
+
+1. Conserva tu `.env`, tus volúmenes y una copia reciente del mundo.
+2. Configura `BEDROCK_PUBLIC_IP=66.179.208.33` y `BEDROCK_UDP_RANGE=19140-19239` en `.env`. Si cambias de servidor, cambia la IP por la de ese host. Los valores anteriores son los predeterminados de este despliegue.
+3. Abre **19132/TCP** y **19140–19239/UDP** en el firewall del proveedor y del host.
+4. Ejecuta desde el repositorio:
+
+```sh
+git pull --ff-only
+docker compose up -d --build --wait
+docker compose exec -T panel node src/migrate-network.js
+```
+
+La migración usa el bloqueo del panel, detiene Bedrock limpiamente, conserva su imagen, mundo, configuración y límites, y recrea el contenedor con la nueva red. Lo inicia de nuevo si estaba encendido. Si estaba detenido, inícialo desde el panel. Desconecta temporalmente a los jugadores. Si falla la creación, restaura el contenedor anterior detenido; revisa el error antes de volver a iniciarlo. No elimina los volúmenes.
+
+Comprueba `docker ps` y `docker logs --tail 40 bedrock-production`. Conecta con un cliente Bedrock actualizado a **66.179.208.33**, puerto **19132**. No uses el dominio con proxy web para jugar.
+
+Referencia del transporte: [NetherNet en la imagen itzg](https://github.com/itzg/docker-minecraft-bedrock-server#nethernet). Las métricas de ping RakNet del panel todavía pueden no estar disponibles con NetherNet; no equivalen al estado real del proceso.

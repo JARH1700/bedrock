@@ -92,6 +92,25 @@ async function managerFixture(t) {
   const manager = createManagement({ ...f, docker, configFile, containerName: name, container: () => docker.getContainer(name), inspect: () => docker.getContainer(name).inspect(), lock: () => { if (locked) return false; locked = true; return true; }, unlock: () => locked = false, job, clock: () => now });
   return { ...f, manager, docker, calls, records, configFile, job, failCreate: () => failCreate = true, forceExit: () => forceExit = true, advance: () => now += 3600001, setLocked: value => locked = value, inspect: () => docker.getContainer(name).inspect() };
 }
+test('migración de red conserva mundo, imagen, memoria y volumen y reanuda el servidor', async t => {
+  const f = await managerFixture(t);
+  await writeJson(f.configFile, { world: 'Original', maxPlayers: 10, port: 19132 });
+  await f.manager.migrateNetwork();
+  const info = await f.inspect();
+  assert.equal(info.State.Running, true);
+  assert.equal(info.Image, 'sha256:original');
+  assert.deepEqual(info.HostConfig.Binds, ['volume:/data']);
+  assert.equal(info.HostConfig.Memory, 1024);
+  assert.ok(info.Config.Env.includes('LEVEL_NAME=Original'));
+  assert.deepEqual(info.HostConfig.PortBindings['19132/tcp'], [{ HostPort: '19132' }]);
+  assert.equal(await fs.readFile(path.join(f.world, 'level.dat'), 'utf8'), 'level-v1');
+});
+test('migración de red recupera el contenedor anterior si falla Docker', async t => {
+  const f = await managerFixture(t); f.failCreate();
+  await assert.rejects(f.manager.migrateNetwork(), /Docker create failed/);
+  assert.equal((await f.inspect()).Id, 'old');
+  assert.equal(await fs.readFile(path.join(f.world, 'level.dat'), 'utf8'), 'level-v1');
+});
 test('cambio de mundo: detiene primero, cambia LEVEL_NAME y queda con reinicio pendiente', async t => {
   const f = await managerFixture(t); await f.manager.selectWorld('Nuevo', true);
   assert.deepEqual(f.calls, ['stop', 'rename', 'create', 'remove']);

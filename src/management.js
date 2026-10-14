@@ -3,6 +3,7 @@ import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { readJson, writeJson, safeWorld } from './packs.js';
 import { WorldStore, defaultSchedule, validateSchedule, nextRun, exists } from './worlds.js';
+import { bedrockNetwork } from './network.js';
 
 export function createManagement({ docker, inspect, container, containerName, configFile, dataDir, panelDir, backupDir, lock, unlock, job, onChange = () => {}, clock = Date.now }) {
   const store = new WorldStore(dataDir, backupDir, panelDir);
@@ -62,6 +63,28 @@ export function createManagement({ docker, inspect, container, containerName, co
       await recoverContainer();
       return { world: name };
     } catch (e) { await recoverContainer(); throw e; }
+  }
+  async function migrateNetwork() {
+    const c = await settings(); if (!c) throw new Error('Servidor no instalado.');
+    const network = bedrockNetwork(c);
+    const resume = await stopped();
+    const info = await inspect(), token = randomUUID();
+    const tx = { token, oldId: info.Id, previous: c, committed: false };
+    await writeJson(containerJournal, tx);
+    try {
+      await container().rename({ name: `${containerName}-previous-${token.slice(0, 8)}` });
+      const keys = network.Env.map(e => e.split('=')[0]);
+      const env = (info.Config.Env || []).filter(e => !keys.includes(e.split('=')[0]));
+      await docker.createContainer({ ...info.Config, name: containerName, Image: info.Image || info.Config.Image,
+        Env: [...env, ...network.Env], ExposedPorts: network.ExposedPorts,
+        Labels: { ...info.Config.Labels, 'bedrock-panel.transaction': token },
+        HostConfig: { ...info.HostConfig, PortBindings: network.PortBindings } });
+      if (resume) await container().start();
+      await writeJson(containerJournal, { ...tx, committed: true });
+      await recoverContainer();
+    } catch (e) { await recoverContainer(); throw e; }
+    onChange();
+    return { port: c.port, udp: process.env.BEDROCK_UDP_RANGE || '19140-19239' };
   }
   async function backup(kind = 'manual', label = '') {
     const c = await settings(); if (!c) throw new Error('Primero instala el servidor.');
@@ -129,5 +152,5 @@ export function createManagement({ docker, inspect, container, containerName, co
       job.status = 'error'; job.message = 'La copia anterior fue interrumpida. Solo se muestran copias finalizadas; revisa la programación.';
     }
   }
-  return { store, runtime, pending, applied, stopped, selectWorld, backup, restore, importWorld, schedule, saveSchedule, tick, recover };
+  return { store, runtime, pending, applied, stopped, selectWorld, migrateNetwork, backup, restore, importWorld, schedule, saveSchedule, tick, recover };
 }

@@ -13,6 +13,8 @@ services:
       COOKIE_SECURE: "true"
       BEDROCK_CONTAINER: ${BEDROCK_CONTAINER:-bedrock-production}
       BEDROCK_VOLUME: ${BEDROCK_VOLUME:-bedrock-production-world}
+      BEDROCK_PUBLIC_IP: ${BEDROCK_PUBLIC_IP:-66.179.208.33}
+      BEDROCK_UDP_RANGE: ${BEDROCK_UDP_RANGE:-19140-19239}
       DATA_DIR: /data
       PANEL_DATA_DIR: /panel-data
       BACKUP_DIR: /backups
