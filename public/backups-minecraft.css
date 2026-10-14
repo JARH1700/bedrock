@@ -1,0 +1,27 @@
+#page-backups{--vault-slot:#d0d2bb;--vault-edge:#858d72;--vault-highlight:#ffffec;--vault-shadow:#56604a;--vault-ink:#293322;--vault-panel:#e5e8d7}
+html[data-theme=dark] #page-backups{--vault-slot:#253329;--vault-edge:#52634a;--vault-highlight:#708264;--vault-shadow:#101b15;--vault-ink:#e0e8cc;--vault-panel:#1b2921}
+#page-backups .backup-summary>.card{position:relative;padding-left:62px;background:var(--vault-slot);border:2px solid var(--vault-edge);box-shadow:inset 2px 2px var(--vault-highlight),inset -2px -2px var(--vault-shadow);color:var(--vault-ink)}
+#page-backups .backup-summary>.card::before{content:'';position:absolute;left:12px;top:16px;width:38px;height:38px;background:url('/backup-chest.svg') center/contain no-repeat;image-rendering:pixelated}
+#page-backups .backup-summary>.card:nth-child(2)::before{background-image:url('/backup-block.svg')}
+#page-backups .backup-summary>.card:nth-child(3)::before{background-image:url('/backup-clock.svg')}
+#page-backups .backup-summary strong{font-family:var(--mc-heading);font-size:18px;line-height:1.5;text-shadow:none}
+#page-backups #backup-next{font-family:'Segoe UI',sans-serif;font-size:14px}
+#page-backups #schedule-settings{border:2px solid var(--vault-edge);background:var(--vault-panel);box-shadow:inset 2px 2px var(--vault-highlight),inset -2px -2px var(--vault-shadow)}
+#page-backups #schedule-settings>summary{background:repeating-linear-gradient(0deg,transparent 0 7px,#8094670a 7px 8px);color:var(--vault-ink);min-height:52px;padding:10px 14px;gap:10px}
+#page-backups #schedule-settings>summary>span:first-child{font:11px/1.6 var(--mc-heading)}
+#page-backups #schedule-settings>summary::before{content:'';width:28px;height:28px;flex-shrink:0;background:url('/backup-clock.svg') center/contain no-repeat;image-rendering:pixelated}
+#page-backups .schedule-edit{padding:6px 10px;border:2px solid var(--vault-edge);box-shadow:inset 1px 1px var(--vault-highlight),inset -1px -1px var(--vault-shadow);text-decoration:none;font:9px/1.5 var(--mc-heading)}
+#page-backups #schedule-settings>summary:focus-visible{outline:3px solid #83ac58;outline-offset:3px}
+#page-backups #schedule-form .card-heading{background:var(--vault-slot);border-bottom:2px solid var(--vault-edge)}
+#page-backups #schedule-form .schedule-toggle input{appearance:none;position:relative;width:20px;height:20px;padding:0;margin:0;border:2px solid var(--vault-shadow);border-radius:0;background:var(--vault-slot);box-shadow:inset 2px 2px #0004;cursor:pointer}
+#page-backups #schedule-form .schedule-toggle input:checked{background:#78a34a}
+#page-backups #schedule-form .schedule-toggle input:checked::after{content:'';position:absolute;inset:4px;background:#e1edbf}
+#page-backups #schedule-form .schedule-toggle input:focus-visible{outline:2px solid #a5bb64;outline-offset:3px}
+#page-backups #schedule-form input,#page-backups #schedule-form select{border-radius:0;border-width:2px}
+#page-backups .operations-caption{padding:10px 0;border-bottom:2px solid var(--vault-edge);margin-top:12px}
+#page-backups .operations-caption h2::before{content:'';display:inline-block;width:25px;height:25px;margin-right:10px;vertical-align:middle;background:url('/backup-chest.svg') center/contain no-repeat;image-rendering:pixelated}
+#page-backups .backup-row{position:relative;padding:14px 16px 14px 60px;border:2px solid var(--vault-edge);background:var(--vault-panel);box-shadow:inset 2px 2px #ffffff12,inset -2px -2px #0002}
+#page-backups .backup-row::before{content:'';position:absolute;left:12px;top:14px;width:36px;height:36px;background:url('/backup-chest.svg') center/contain no-repeat;image-rendering:pixelated}
+#page-backups #backups-list>.empty{padding:22px 16px;border:2px dashed var(--vault-edge);background:repeating-linear-gradient(90deg,transparent 0 31px,#80946709 31px 32px),repeating-linear-gradient(0deg,transparent 0 31px,#80946709 31px 32px);font-size:12px}
+#page-backups #backups-list>.empty::before{content:'';display:block;width:40px;height:40px;margin:0 auto 10px;background:url('/backup-chest.svg') center/contain no-repeat;border:0;box-shadow:none;image-rendering:pixelated}
+@media(max-width:650px){#page-backups .backup-summary>.card{padding:10px 10px 10px 45px}#page-backups .backup-summary>.card::before{width:28px;height:28px;left:8px;top:14px}#page-backups #schedule-settings>summary>span:first-child{font-size:10px}#page-backups #schedule-summary{flex-basis:auto}#page-backups .schedule-edit{margin-left:auto}#page-backups .backup-row{padding-left:54px}#page-backups .operations-caption h2::before{display:none}}

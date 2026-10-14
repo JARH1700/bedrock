@@ -1,0 +1,61 @@
+@font-face{font-family:'Bedrock Blocks';src:url('/fonts/bedrock-blocks.ttf') format('truetype');font-weight:700;font-style:normal;font-display:swap}
+html[data-theme]{--mc-heading:'Bedrock Blocks',Consolas,monospace}
+html[data-theme=dark]{--paper:#222b23;--line:#414e3d}
+html[data-theme=light]{--paper:#edf0e5;--line:#b0b9a0}
+html[data-theme] body h1,html[data-theme] body .hero-copy h2,html[data-theme] body .login-story h2,html[data-theme] body .login-card h1{font-family:var(--mc-heading);font-weight:700;letter-spacing:0;line-height:1.55;font-size:26px;text-shadow:none}
+html[data-theme] body h3{font-family:var(--mc-heading);font-size:13px;line-height:1.7;letter-spacing:0}
+html[data-theme] body .brand{font-family:var(--mc-heading);font-weight:700;font-size:21px;letter-spacing:0;gap:8px}
+html[data-theme] body .sidebar>.brand{padding:0 3px;font-size:20px}
+html[data-theme] body .sidebar .brand-tag{display:none}
+html[data-theme] body .sidebar{background-image:linear-gradient(#0a160baa,#0a160baa),url('/stone-tile.svg');background-size:auto,64px 64px;border-right:4px solid #060d07;box-shadow:inset -3px 0 #5b704544}
+html[data-theme] body nav a{background:#1e2a1c;border:2px solid #0c140b;box-shadow:inset 2px 2px #43503c,inset -2px -2px #10190e;color:#c0c9b6;padding:10px 12px}
+html[data-theme] body nav a:hover{background:#35432b;transform:none}
+html[data-theme] body nav a.active{background:#4d6533;color:#f2f6df;border-color:#b5cd76;box-shadow:inset 2px 2px #91ab58,inset -2px -2px #2e421e}
+html[data-theme] body nav a.active:before{display:none}
+html[data-theme] body nav a .icon{padding:3px;width:24px;height:24px;background:#0002;box-shadow:inset 1px 1px #0005,1px 1px #fff1}
+html[data-theme] body .nav-label{font-family:Consolas,monospace;font-size:9px;letter-spacing:1.5px}
+html[data-theme] body .topbar{border-bottom:4px solid var(--line);background-image:linear-gradient(#ffffff03,#ffffff03)}
+html[data-theme] body .card,html[data-theme] body .metric,html[data-theme] body .pack-row,html[data-theme] body .setup-steps,html[data-theme] body .community-banner{border:3px solid var(--line);box-shadow:inset 3px 3px #ffffff09,inset -3px -3px #0002,4px 4px var(--mc-shadow)}
+html[data-theme] body .card-heading{border-bottom:3px solid var(--line);background-image:linear-gradient(#ffffff05,#00000009);box-shadow:inset 0 2px #ffffff0a}
+html[data-theme] body .primary,html[data-theme] body .secondary,html[data-theme] body .danger{font-family:var(--mc-heading);font-size:10px;line-height:1.8;font-weight:700;border-width:2px;box-shadow:inset 3px 3px #ffffff20,inset -3px -3px #0005,0 4px #0006;min-height:42px}
+html[data-theme] body .secondary{background:#515c49;color:#f0f4e8;border-color:#1a2316;text-shadow:none}
+html[data-theme] body .secondary:not(:disabled):hover{background:#657250;border-color:#a2bb79;color:#fff}
+html[data-theme=light] body .secondary{background:#d0d7bf;color:#283120;border-color:#7c896b;text-shadow:none}
+html[data-theme=light] body .secondary:not(:disabled):hover{background:#e1e8cf;color:#1e2b16}
+html[data-theme] body .primary{background:#4d7b2c;border-color:#283f19;box-shadow:inset 3px 3px #90b950,inset -3px -3px #36551d,0 4px #0006;text-shadow:none}
+html[data-theme] body .danger{background:#633f30;color:#f3d6b9;border-color:#392416;text-shadow:none}
+html[data-theme] body .theme-toggle{font:10px Consolas,monospace;font-weight:700}
+html[data-theme] body .server-hero{border:4px solid #5a7139;box-shadow:0 5px #091107,inset 4px 4px #ffffff08;background-image:linear-gradient(90deg,#152819,#182f1e)}
+html[data-theme] body .server-hero:before{height:24px;background:url('/terrain-tile.svg') repeat-x;background-size:64px 48px;image-rendering:pixelated}
+html[data-theme] body .hero-copy{padding-top:48px;min-height:335px}
+html[data-theme] body .hero-copy h2{font-size:25px;max-width:470px}
+html[data-theme] body .hero-world{top:14px;height:350px}
+html[data-theme] body .hero-footer{background:linear-gradient(#172216d9,#172216d9),url('/stone-tile.svg');border-top:4px solid #506036;box-shadow:inset 0 3px #697b4540;padding:19px 26px}
+html[data-theme] body .hero-tags .badge{background:#0d1e10;border:2px solid #475f35;box-shadow:inset 2px 2px #0004;color:#d1e5ab}
+html[data-theme] body .power-actions{gap:10px}
+html[data-theme] body .power-actions button{font-size:9px;padding:9px 12px}
+html[data-theme] body .metric{border-top-width:5px;background-image:linear-gradient(#ffffff03,#00000006)}
+html[data-theme] body .metric-label .icon{width:28px;height:28px;padding:4px;background:#0002;border:1px solid var(--line);box-shadow:inset 2px 2px #0003;color:#adc487}
+html[data-theme] body .metric strong{font-family:var(--mc-heading);font-size:23px;line-height:1.5;letter-spacing:0;overflow-wrap:anywhere}
+html[data-theme] body .telemetry-highlights .metric strong{font-size:18px}
+html[data-theme] body .shortcut-icon,html[data-theme] body .workspace-mark,html[data-theme] body .world-drop-icon,html[data-theme] body .skin-avatar{border:2px solid #0b170b;box-shadow:inset 2px 2px #ffffff1a,inset -2px -2px #0004,2px 2px #0004}
+html[data-theme] body .upload-zone{border:3px dashed #637c48;background-image:linear-gradient(90deg,var(--mc-grid) 2px,transparent 2px),linear-gradient(var(--mc-grid) 2px,transparent 2px);background-size:32px 32px}
+html[data-theme] body .upload-zone h3{font-size:20px;line-height:1.6}
+html[data-theme] body .texture-zone{border-color:#49798d}
+html[data-theme] body .package-cube{width:76px;height:76px;border-width:3px;box-shadow:inset 4px 4px #ffffff17,inset -4px -4px #0003,9px 9px #0004}
+html[data-theme] body .command-help-item{box-shadow:inset 2px 2px #0002,inset -2px -2px #ffffff06;border-top-width:4px}
+html[data-theme] body input,html[data-theme] body select{box-shadow:inset 3px 3px #0003,inset -1px -1px #ffffff08}
+html[data-theme] body .login-story{border-bottom:0}
+html[data-theme] body .login-story:before{background:url('/terrain-tile.svg') repeat-x;mask-image:none;inset:auto 0 0;height:48px;z-index:3}
+html[data-theme] body .login-story h2{font-size:33px;line-height:1.65;max-width:560px}
+html[data-theme] body .login-story h2 em{color:#acd36b}
+html[data-theme] body .login-story-footer{bottom:65px}
+html[data-theme] body .login-card{border:4px solid var(--line);box-shadow:inset 3px 3px #ffffff0a,inset -3px -3px #0003,8px 8px var(--mc-shadow);width:430px}
+html[data-theme] body .login-card h1{font-size:25px}
+html[data-theme] body .login-world{bottom:70px}
+html[data-theme] body .login-emblem{width:55px;height:55px;background:#2d4125;border:3px solid #7a9850;color:#c9e99b}
+html[data-theme] body .section-caption h2{font-family:var(--mc-heading);font-size:11px;line-height:1.8;letter-spacing:0}
+html[data-theme] body .edition,html[data-theme] body .eyebrow,html[data-theme] body .card-overline{font-family:Consolas,monospace}
+@media(max-width:1150px){html[data-theme] body .sidebar>.brand{font-size:17px}html[data-theme] body .hero-copy h2{font-size:22px}html[data-theme] body .hero-copy{width:66%}html[data-theme] body .login-story h2{font-size:27px}html[data-theme] body .login-card h1{font-size:21px}}
+@media(max-width:900px){html[data-theme] body h1{font-size:23px}html[data-theme] body .sidebar>.brand{font-size:15px;gap:5px}html[data-theme] body nav a{gap:9px;padding:9px 8px;font-size:12px}html[data-theme] body .hero-copy{width:80%}html[data-theme] body .hero-copy h2{font-size:22px}html[data-theme] body .login-story h2{font-size:24px}html[data-theme] body .login-card{padding:20px}html[data-theme] body .login-card h1{font-size:19px}}
+@media(max-width:650px){html[data-theme] body .sidebar>.brand{font-size:20px;gap:8px}html[data-theme] body nav a{padding:8px 10px;font-size:11px}html[data-theme] body nav a .icon{width:20px;height:20px;padding:2px}html[data-theme] body h1{font-size:21px;line-height:1.55}html[data-theme] body .hero-copy{width:100%;min-height:330px;padding:46px 18px 26px}html[data-theme] body .hero-copy h2{font-size:20px;max-width:280px}html[data-theme] body .hero-world{height:260px;top:90px}html[data-theme] body .hero-footer{padding:16px 12px}html[data-theme] body .power-actions{gap:6px}html[data-theme] body .power-actions button{font-size:8px;padding:7px 6px;gap:4px}html[data-theme] body .power-actions .icon{width:12px;height:12px}html[data-theme] body .metric{padding-left:12px;padding-right:12px}html[data-theme] body .metric-label{font-size:10px}html[data-theme] body .metric-label .icon{width:22px;height:22px;padding:3px}html[data-theme] body .metric strong{font-size:20px}html[data-theme] body .metric small{font-size:10px}html[data-theme] body .section-caption h2{font-size:10px;max-width:170px}html[data-theme] body .section-caption>span{font-size:9px;text-align:right}html[data-theme] body h3{font-size:12px}html[data-theme] body .upload-zone h3{font-size:17px}html[data-theme] body .login-story{min-height:300px}html[data-theme] body .login-story h2{font-size:20px;max-width:265px;line-height:1.5}html[data-theme] body .login-story:before{height:24px}html[data-theme] body .login-world{bottom:12px;width:260px}html[data-theme] body .login-card{width:100%}html[data-theme] body .login-card h1{font-size:21px}html[data-theme] body .telemetry-highlights .metric strong{font-size:16px}html[data-theme] body .secondary,html[data-theme] body .primary,html[data-theme] body .danger{font-size:9px}html[data-theme] body .page-heading>.secondary{font-size:0}html[data-theme] body .page-heading>#backup-now{font-size:9px}}
