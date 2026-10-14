@@ -1,0 +1,23 @@
+{
+  "name": "bedrock-panel",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.24.0",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test",
+    "check": "node --check src/server.js && node --check src/packs.js && node --check src/worlds.js && node --check src/management.js && node --check src/metrics.js && node --check public/app.js && node --check public/operations.js && node --check public/seed-finder.js && node --check public/seed-engine.js && node --check public/seed-worker.js",
+    "build:seed-engine": "node scripts/build-seed-engine.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "adm-zip": "^0.6.1",
+    "dockerode": "^5.0.1",
+    "express": "^5.1.0",
+    "multer": "^2.0.2"
+  }
+}

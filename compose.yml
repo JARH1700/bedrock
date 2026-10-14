@@ -1,0 +1,42 @@
+services:
+  panel:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    expose:
+      - "3000"
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Define ADMIN_PASSWORD de al menos 12 caracteres en Dokploy}
+      COOKIE_SECURE: "true"
+      BEDROCK_CONTAINER: ${BEDROCK_CONTAINER:-bedrock-production}
+      BEDROCK_VOLUME: ${BEDROCK_VOLUME:-bedrock-production-world}
+      DATA_DIR: /data
+      PANEL_DATA_DIR: /panel-data
+      BACKUP_DIR: /backups
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - bedrock-data:/data
+      - panel-data:/panel-data
+      - backups:/backups
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  bedrock-data:
+    name: ${BEDROCK_VOLUME:-bedrock-production-world}
+  panel-data:
+    name: ${PANEL_VOLUME:-bedrock-production-panel}
+  backups:
+    name: ${BACKUP_VOLUME:-bedrock-production-backups}
