@@ -1,0 +1,14 @@
+import { spawnSync } from 'node:child_process';
+import { mkdir, copyFile, readFile, writeFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+const zig = process.argv[2] || 'zig';
+const sources = ['noise', 'biomes', 'layers', 'biomenoise', 'cave', 'generator', 'finders', 'util', 'quadbase', 'mt'];
+await mkdir('public/engine', { recursive: true });
+const args = ['cc', '-target', 'wasm32-wasi', '-mexec-model=reactor', '-O2', '-fwrapv', '-D__thread=', '-Ivendor/cubiomes-bedrock', 'scripts/seed-engine.c', ...sources.map(n => `vendor/cubiomes-bedrock/${n}.c`), '-lm', '-Wl,-z,stack-size=2097152', '-Wl,--initial-memory=8388608', '-Wl,--max-memory=67108864', ...['init', 'biome', 'color', 'name', 'region', 'structure'].map(n => `-Wl,--export=${n}`), '-o', 'public/engine/bedrock.wasm'];
+const result = spawnSync(zig, args, { stdio: 'inherit' });
+if (result.error) throw result.error;
+if (result.status !== 0) process.exit(result.status || 1);
+await copyFile('vendor/cubiomes-bedrock/LICENSE', 'public/engine/LICENSE.txt');
+await copyFile('vendor/cubiomes-bedrock/UPSTREAM.json', 'public/engine/UPSTREAM.json');
+await writeFile('public/engine/build.json', JSON.stringify({ compiler: 'Zig 0.14.1', sha256: createHash('sha256').update(await readFile('public/engine/bedrock.wasm')).digest('hex'), args }, null, 2));
+console.log('Motor Bedrock compilado.');
