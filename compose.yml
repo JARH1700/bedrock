@@ -9,7 +9,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: "3000"
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Define ADMIN_PASSWORD de al menos 12 caracteres en Dokploy}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Define ADMIN_PASSWORD de al menos 12 caracteres en .env}
       COOKIE_SECURE: "true"
       BEDROCK_CONTAINER: ${BEDROCK_CONTAINER:-bedrock-production}
       BEDROCK_VOLUME: ${BEDROCK_VOLUME:-bedrock-production-world}
@@ -33,6 +33,28 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  proxy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      panel:
+        condition: service_healthy
+    environment:
+      PANEL_DOMAIN: ${PANEL_DOMAIN:-minecraft.pr4do.cloud}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
 volumes:
   bedrock-data:
     name: ${BEDROCK_VOLUME:-bedrock-production-world}
@@ -40,3 +62,5 @@ volumes:
     name: ${PANEL_VOLUME:-bedrock-production-panel}
   backups:
     name: ${BACKUP_VOLUME:-bedrock-production-backups}
+  caddy-data:
+  caddy-config:

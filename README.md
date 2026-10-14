@@ -1,33 +1,40 @@
-# Panel Bedrock · producción en Dokploy
+# Panel Bedrock · Docker Compose
 
-Carpeta independiente para subir como raíz de un repositorio Git. Incluye el panel, sus recursos, el motor de biomas precompilado, pruebas y fuentes del motor con su licencia. Usa Node.js 24 y pnpm; no requiere compilar WebAssembly durante el despliegue.
+Panel independiente para administrar Minecraft Bedrock. URL configurada: **https://minecraft.pr4do.cloud**. Incluye un proxy Caddy para HTTPS, el panel y volúmenes persistentes. El panel instala el contenedor de juego desde su interfaz.
 
-## Publicar en Git
+## Requisitos
 
-Crea un repositorio vacío en tu proveedor y ejecuta desde esta carpeta, con Git instalado:
+- Servidor Linux con Docker Engine y Docker Compose v2, Git y acceso a Internet.
+- Registro DNS A de `minecraft.pr4do.cloud` apuntando a la IP pública del servidor. Si tienes AAAA, debe apuntar también a este servidor con IPv6 operativo. Para conexión directa, configura el registro en modo solo DNS si usas un proveedor con proxy.
+- Puertos **80/TCP y 443/TCP** disponibles en el host y abiertos en firewall/router. **443/UDP** es opcional para HTTP/3. El juego usa **19132/UDP** por defecto: ábrelo también.
+- Si hay otro proxy ocupando 80/443, libera esos puertos antes de iniciar este Compose. No detengas servicios ajenos sin revisar qué alojan.
+
+## Instalar
 
 ```sh
-git init -b main
-git add .
-git commit -m "Prepare Bedrock panel for Dokploy"
-git remote add origin URL_DE_TU_REPOSITORIO
-git push -u origin main
+git clone https://github.com/JARH1700/bedrock.git
+cd bedrock
+cp .env.example .env
+chmod 600 .env
+nano .env
 ```
 
-No subas `.env`, mundos, copias ni `node_modules`. `.env.example` contiene únicamente nombres y una contraseña vacía. La carpeta no importa tus mundos locales: una instalación nueva empieza sin servidor configurado.
+Establece `ADMIN_PASSWORD` con una contraseña única de al menos 12 caracteres. Mantén `PANEL_DOMAIN=minecraft.pr4do.cloud`. No subas `.env` a Git. Si tu contraseña contiene `$` o `#`, escribe el valor entre comillas simples en `.env`.
 
-## Desplegar
+```sh
+docker compose config --quiet
+docker compose up -d --build
+docker compose ps
+docker compose logs --tail=100 panel proxy
+```
 
-1. En un servidor Linux con Docker, crea un proyecto y un servicio **Docker Compose** en Dokploy. No selecciones Stack: este despliegue utiliza `build`.
-2. Conecta el repositorio y la rama `main`. Si publicaste esta carpeta como raíz, configura **Compose Path: `./compose.yml`**. Si publicaste el proyecto completo, usa **`./production/compose.yml`**.
-3. En **Environment**, pega el contenido de `.env.example` y establece `ADMIN_PASSWORD` con una contraseña única de al menos 12 caracteres. Para varias instalaciones, asigna nombres distintos a los cuatro recursos Docker; una vez instalado, conserva esos nombres para seguir usando los mismos datos.
-4. En **Domains**, agrega tu dominio al servicio **`panel`**, puerto interno **`3000`**, con HTTPS y certificado. Apunta el DNS al servidor. Dokploy configura el enrutamiento; el panel no publica un puerto HTTP directamente en el host. Las cookies requieren HTTPS.
-5. Despliega, abre el dominio e inicia sesión. Desde la instalación del panel acepta la EULA de Minecraft e instala `itzg/minecraft-bedrock-server`.
-6. Permite el puerto de juego elegido en el firewall del servidor/proveedor y, si aplica, en el router: normalmente **19132/UDP**. El dominio web no sustituye esta conexión UDP.
+Abre **https://minecraft.pr4do.cloud**, inicia sesión y usa la instalación del panel para aceptar la EULA e instalar `itzg/minecraft-bedrock-server`. Para jugar, usa `minecraft.pr4do.cloud` y el puerto UDP configurado, normalmente 19132; no escribas `https://` en Minecraft.
 
-Referencia: [Docker Compose en Dokploy](https://docs.dokploy.com/docs/core/docker-compose), [configurar dominios](https://docs.dokploy.com/docs/core/docker-compose/domains).
+Caddy obtiene y renueva el certificado y redirige HTTP a HTTPS cuando el DNS y los puertos son accesibles. Las cookies del panel requieren HTTPS. [Documentación de HTTPS automático](https://caddyserver.com/docs/automatic-https).
 
-## Persistencia y mantenimiento
+El panel escucha en 3000 dentro de Docker; solo el proxy publica los puertos web. La consola transmitida se reenvía sin esperar a llenar un búfer.
+
+## Datos y actualización
 
 | Variable | Contenido |
 | --- | --- |
@@ -35,20 +42,29 @@ Referencia: [Docker Compose en Dokploy](https://docs.dokploy.com/docs/core/docke
 | `PANEL_VOLUME` | Configuración del panel y programación de copias |
 | `BACKUP_VOLUME` | Copias del mundo |
 
-El panel crea el contenedor Bedrock directamente en el mismo Docker del host. Ese contenedor no pertenece al Compose del panel: al detener o eliminar el panel, Bedrock puede seguir encendido. Detén el juego desde el panel antes de un mantenimiento que lo requiera. No elimines volúmenes para actualizar.
+Conserva los nombres de volúmenes y de `BEDROCK_CONTAINER` si ya tienes una instalación en este mismo host. Solo debe haber un panel administrando ese contenedor. Una instalación en otro host requiere trasladar los datos; Git no incluye mundos ni copias. Los volúmenes de Caddy guardan sus certificados y configuración.
 
-El acceso a `/var/run/docker.sock` es necesario para administrar Bedrock y otorga control sobre Docker del host. Protege el acceso al panel. Las copias en este servidor no cubren la pérdida del host: conserva también una copia externa de los volúmenes. La programación solo se ejecuta mientras el panel está activo.
+```sh
+git pull --ff-only
+docker compose up -d --build
+```
 
-## Comprobación después de desplegar
+No uses `docker compose down -v` para actualizar: elimina volúmenes del despliegue. El contenedor Bedrock se crea fuera de Compose; detener el panel no detiene automáticamente el juego. Usa el panel para detenerlo antes del mantenimiento que lo requiera.
 
-- Comprueba el estado saludable del servicio y el acceso HTTPS. `/api/health` verifica el panel, no la disponibilidad de Bedrock.
-- Instala e inicia Bedrock, revisa la consola y entra desde Minecraft Bedrock por el puerto UDP configurado.
-- Crea un mundo de prueba, genera una copia y comprueba su restauración antes de usar mundos importantes.
-- Redepliega el panel y verifica que conserva configuración, mundos y copias.
+El socket Docker permite al panel administrar el host. Protege la contraseña y el acceso al servidor. Conserva copias externas: los backups locales no cubren la pérdida del host. La programación de copias solo funciona mientras el panel está activo.
 
-El Seed Finder es experimental: incluye perfiles hasta Bedrock 1.21.60 y estructuras previstas, no garantiza coincidencia con versiones posteriores ni con todas las estructuras del mundo real.
+## Verificar la instalación
 
-## Desarrollo y actualización del paquete
+```sh
+curl --fail https://minecraft.pr4do.cloud/api/health
+docker compose ps
+```
+
+El healthcheck comprueba el panel, no Bedrock. Verifica además que puedes entrar al juego, crear y restaurar una copia de un mundo de prueba y redeplegar sin perder los datos.
+
+Si falla HTTPS, revisa DNS, puertos y `docker compose logs proxy`. Si el panel funciona pero el juego no conecta, revisa el estado de Bedrock y el puerto UDP en el firewall.
+
+## Desarrollo
 
 ```sh
 pnpm install --frozen-lockfile
@@ -56,6 +72,4 @@ pnpm check
 pnpm test
 ```
 
-Desde el proyecto original, `node scripts/prepare-production.mjs` vuelve a copiar las fuentes permitidas a esta carpeta y conserva su configuración de despliegue. Si borras o renombras archivos en el proyecto original, elimina también sus versiones antiguas aquí antes de publicar. Revisa siempre el diff antes del commit.
-
-El Dockerfile instala las dependencias de producción con el lockfile. Las pruebas locales no sustituyen comprobar la construcción de la imagen y la conexión real a Bedrock en Dokploy.
+El motor WebAssembly viene compilado; su fuente y licencia están incluidas. El Seed Finder es experimental, con perfiles hasta Bedrock 1.21.60 y estructuras previstas. No garantiza coincidencia con todas las estructuras ni con versiones posteriores.

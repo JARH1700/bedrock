@@ -1,0 +1,6 @@
+{$PANEL_DOMAIN:minecraft.pr4do.cloud} {
+	encode zstd gzip
+	reverse_proxy panel:3000 {
+		flush_interval -1
+	}
+}
