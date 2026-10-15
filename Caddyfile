@@ -1,13 +1,24 @@
+{
+	default_sni {$BEDROCK_PUBLIC_IP:66.179.208.33}
+}
+
 {$PANEL_DOMAIN:minecraft.pr4do.cloud} {
 	encode zstd gzip
-	handle /v1/* {
-		reverse_proxy host.docker.internal:{$BEDROCK_SIGNAL_PORT:19132} {
-			flush_interval -1
-		}
-	}
 	handle {
 		reverse_proxy panel:3000 {
 			flush_interval -1
 		}
+	}
+}
+
+https://{$BEDROCK_PUBLIC_IP:66.179.208.33}:19132 {
+	tls {
+		issuer acme {
+			profile shortlived
+			disable_tlsalpn_challenge
+		}
+	}
+	reverse_proxy host.docker.internal:19130 {
+		flush_interval -1
 	}
 }

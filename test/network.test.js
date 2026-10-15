@@ -11,3 +11,9 @@ test('NetherNet publica TCP y todo el rango UDP con dirección anunciada', () =>
 test('NetherNet rechaza direcciones y rangos inválidos', () => {
   for (const env of [{ BEDROCK_PUBLIC_IP: 'example.com' }, { BEDROCK_UDP_RANGE: '19140-19141' }, { BEDROCK_UDP_RANGE: '65000-66000' }, { BEDROCK_UDP_RANGE: 'bad' }]) assert.throws(() => bedrockNetwork({ port: 19132, maxPlayers: 10 }, env));
 });
+test('TLS por IP separa el puerto privado de señalización del puerto público', () => {
+  const n = bedrockNetwork({ port: 19132, maxPlayers: 10 }, { BEDROCK_SIGNAL_BIND_PORT: '19130' });
+  assert.deepEqual(n.PortBindings['19132/tcp'], [{ HostPort: '19130' }]);
+  assert.ok(n.PortBindings['19140/udp']);
+  assert.throws(() => bedrockNetwork({ port: 19132, maxPlayers: 10 }, { BEDROCK_SIGNAL_BIND_PORT: 'bad' }));
+});

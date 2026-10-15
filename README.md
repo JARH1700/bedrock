@@ -95,18 +95,20 @@ Comprueba `docker ps` y `docker logs --tail 40 bedrock-production`. Conecta con 
 
 Referencia del transporte: [NetherNet en la imagen itzg](https://github.com/itzg/docker-minecraft-bedrock-server#nethernet). Las métricas de ping RakNet del panel todavía pueden no estar disponibles con NetherNet; no equivalen al estado real del proceso.
 
-## Conexión recomendada para todos los dispositivos: HTTPS
+## Conexión por IP y puerto 19132
 
-En Minecraft agrega **minecraft.pr4do.cloud**, puerto **443**, sin `https://`. Esta entrada sustituye la IP y puerto 19132 indicados arriba para clientes que fallan durante la negociación TLS de NetherNet.
+En Minecraft agrega **66.179.208.33**, puerto **19132**. El dominio y puerto 443 quedan exclusivamente para el panel de administración.
 
-Caddy reenvía `/v1/*` al puerto HTTP interno de Bedrock y mantiene las demás rutas del panel. Solo la negociación pasa por HTTPS; el juego usa directamente la IP y el rango UDP configurados. Conserva esos puertos UDP abiertos. `BEDROCK_SIGNAL_PORT` debe coincidir con el puerto TCP publicado por Bedrock (19132 por defecto). Si utilizas un proxy DNS/HTTPS, debe permitir estas rutas sin desafíos interactivos.
+Caddy ofrece un certificado público para la IP en TCP 19132, con renovación automática mediante el perfil shortlived de Let's Encrypt. Reenvía al puerto backend 19130 del host. Bedrock conserva el rango UDP 19140–19239 para el juego, directamente por IP y sin Cloudflare. Mantén el puerto 80 accesible para renovar el certificado y conserva el volumen de certificados. Usa una versión de Caddy compatible con certificados públicos de IP (verificado con 2.11.7). BEDROCK_PUBLIC_IP debe ser la IP real del host.
 
-Para aplicar esta corrección sobre un servidor ya migrado a NetherNet, sin detener el mundo:
+Para actualizar una instalación existente (Bedrock se detiene brevemente para conservar el mundo y cambiar su puerto backend):
 
 ```sh
 git pull --ff-only
-docker compose up -d --no-deps proxy
-curl --fail https://minecraft.pr4do.cloud/v1/join
+docker compose up -d --build --no-deps --wait panel
+docker compose exec -T panel node src/migrate-network.js
+docker compose up -d --no-deps --force-recreate proxy
+curl --fail https://66.179.208.33:19132/v1/join
 ```
 
-La consulta debe devolver información del servidor en JSON. Un 502 indica que el proxy no alcanza a Bedrock: comprueba que esté iniciado y que `BEDROCK_SIGNAL_PORT` coincida. Se requiere Docker compatible con `host-gateway`.
+La consulta debe devolver información del servidor en JSON con certificado válido. No uses `-k`. Un 502 indica que Bedrock no está iniciado o falta migrar su puerto backend. Se requiere Docker compatible con `host-gateway`. Migra antes de recrear el proxy para liberar TCP 19132. La variable anterior BEDROCK_SIGNAL_PORT ya no se utiliza.

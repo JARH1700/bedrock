@@ -107,6 +107,7 @@ test('migración de red conserva mundo, imagen, memoria y volumen y reanuda el s
 });
 test('migración de red recupera el contenedor anterior si falla Docker', async t => {
   const f = await managerFixture(t); f.failCreate();
+  await writeJson(f.configFile, { world: 'Original', maxPlayers: 10, port: 19132 });
   await assert.rejects(f.manager.migrateNetwork(), /Docker create failed/);
   assert.equal((await f.inspect()).Id, 'old');
   assert.equal(await fs.readFile(path.join(f.world, 'level.dat'), 'utf8'), 'level-v1');
