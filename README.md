@@ -94,3 +94,19 @@ La migración usa el bloqueo del panel, detiene Bedrock limpiamente, conserva su
 Comprueba `docker ps` y `docker logs --tail 40 bedrock-production`. Conecta con un cliente Bedrock actualizado a **66.179.208.33**, puerto **19132**. No uses el dominio con proxy web para jugar.
 
 Referencia del transporte: [NetherNet en la imagen itzg](https://github.com/itzg/docker-minecraft-bedrock-server#nethernet). Las métricas de ping RakNet del panel todavía pueden no estar disponibles con NetherNet; no equivalen al estado real del proceso.
+
+## Conexión recomendada para todos los dispositivos: HTTPS
+
+En Minecraft agrega **minecraft.pr4do.cloud**, puerto **443**, sin `https://`. Esta entrada sustituye la IP y puerto 19132 indicados arriba para clientes que fallan durante la negociación TLS de NetherNet.
+
+Caddy reenvía `/v1/*` al puerto HTTP interno de Bedrock y mantiene las demás rutas del panel. Solo la negociación pasa por HTTPS; el juego usa directamente la IP y el rango UDP configurados. Conserva esos puertos UDP abiertos. `BEDROCK_SIGNAL_PORT` debe coincidir con el puerto TCP publicado por Bedrock (19132 por defecto). Si utilizas un proxy DNS/HTTPS, debe permitir estas rutas sin desafíos interactivos.
+
+Para aplicar esta corrección sobre un servidor ya migrado a NetherNet, sin detener el mundo:
+
+```sh
+git pull --ff-only
+docker compose up -d --no-deps proxy
+curl --fail https://minecraft.pr4do.cloud/v1/join
+```
+
+La consulta debe devolver información del servidor en JSON. Un 502 indica que el proxy no alcanza a Bedrock: comprueba que esté iniciado y que `BEDROCK_SIGNAL_PORT` coincida. Se requiere Docker compatible con `host-gateway`.

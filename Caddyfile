@@ -1,6 +1,13 @@
 {$PANEL_DOMAIN:minecraft.pr4do.cloud} {
 	encode zstd gzip
-	reverse_proxy panel:3000 {
-		flush_interval -1
+	handle /v1/* {
+		reverse_proxy host.docker.internal:{$BEDROCK_SIGNAL_PORT:19132} {
+			flush_interval -1
+		}
+	}
+	handle {
+		reverse_proxy panel:3000 {
+			flush_interval -1
+		}
 	}
 }

@@ -43,6 +43,9 @@ services:
         condition: service_healthy
     environment:
       PANEL_DOMAIN: ${PANEL_DOMAIN:-minecraft.pr4do.cloud}
+      BEDROCK_SIGNAL_PORT: ${BEDROCK_SIGNAL_PORT:-19132}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "80:80"
       - "443:443"
