@@ -1,5 +1,24 @@
 # Panel Bedrock · Docker Compose
 
+## Actualización: varios jugadores por un único puerto público
+
+En IONOS permite **19132/TCP y 19132/UDP**. El servicio `game-mux` distribuye las sesiones de todos los jugadores sobre UDP 19132; sustituye las instrucciones anteriores de abrir un rango UDP al exterior que aparecen más abajo.
+
+Los jugadores siguen entrando por **66.179.208.33:19132**. El panel conserva su dominio. Bedrock usa internamente 19130/TCP y 19140–19239/UDP, enlazados a **127.0.0.1** mediante `BEDROCK_PRIVATE_NETWORK=true`. No abras ese rango en el proveedor. El multiplexor conserva la autenticación e integridad STUN. Su fuente MIT y revisión están incluidas en `nethernet-mux`.
+
+Para actualizar, guarda una copia del mundo y ejecuta:
+
+```sh
+git pull --ff-only
+docker compose up -d --build --no-deps --wait panel game-mux
+docker compose exec -T panel node src/migrate-network.js
+docker compose up -d --no-deps --force-recreate proxy
+```
+
+La migración conserva el mundo y requiere reconectar a los jugadores. Reiniciar el multiplexor también corta sus sesiones. El límite lo establece Bedrock (10 jugadores en esta instalación). El multiplexor usa la red del host y escucha su HTTP interno en la puerta de enlace Docker predeterminada 172.17.0.1:19131; adapta esa dirección si tu host cambia esa red. No requiere privilegios de administrador ni acceso al socket Docker.
+
+Verifica `docker port bedrock-production` (backend en 127.0.0.1), `docker compose logs game-mux` y dos jugadores conectados simultáneamente.
+
 Panel independiente para administrar Minecraft Bedrock. URL configurada: **https://minecraft.pr4do.cloud**. Incluye un proxy Caddy para HTTPS, el panel y volúmenes persistentes. El panel instala el contenedor de juego desde su interfaz.
 
 ## Requisitos

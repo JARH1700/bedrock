@@ -9,7 +9,9 @@ export function bedrockNetwork(settings, env = process.env) {
   if (a < 1024 || b > 65535 || a > b || b - a >= 1000 || b - a + 1 < settings.maxPlayers) throw new Error('Rango UDP inválido: requiere un puerto por jugador y máximo 1000.');
   const signalPort = Number(env.BEDROCK_SIGNAL_BIND_PORT || settings.port);
   if (!Number.isInteger(signalPort) || signalPort < 1024 || signalPort > 65535) throw new Error('Puerto TCP de Bedrock inválido.');
-  const ports = { '19132/tcp': [{ HostPort: String(signalPort) }] };
-  for (let port = a; port <= b; port++) ports[`${port}/udp`] = [{ HostPort: String(port) }];
-  return { Env: ['TRANSPORT=nethernet', 'SERVER_PORT=19132', `SERVER_UDP_PORTS=${ip}:${range}:${range}`], ExposedPorts: Object.fromEntries(Object.keys(ports).map(key => [key, {}])), PortBindings: ports };
+  const privateNetwork = env.BEDROCK_PRIVATE_NETWORK === 'true';
+  const binding = port => ({ HostPort: String(port), ...(privateNetwork ? { HostIp: '127.0.0.1' } : {}) });
+  const ports = { '19132/tcp': [binding(signalPort)] };
+  for (let port = a; port <= b; port++) ports[`${port}/udp`] = [binding(port)];
+  return { Env: ['TRANSPORT=nethernet', 'SERVER_PORT=19132', `SERVER_UDP_PORTS=${privateNetwork ? '127.0.0.1' : ip}:${range}:${range}`], ExposedPorts: Object.fromEntries(Object.keys(ports).map(key => [key, {}])), PortBindings: ports };
 }

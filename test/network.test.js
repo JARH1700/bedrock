@@ -17,3 +17,8 @@ test('TLS por IP separa el puerto privado de señalización del puerto público'
   assert.ok(n.PortBindings['19140/udp']);
   assert.throws(() => bedrockNetwork({ port: 19132, maxPlayers: 10 }, { BEDROCK_SIGNAL_BIND_PORT: 'bad' }));
 });
+test('puerto único mantiene todos los puertos backend en loopback', () => {
+  const n = bedrockNetwork({ port: 19132, maxPlayers: 10 }, { BEDROCK_PRIVATE_NETWORK: 'true', BEDROCK_SIGNAL_BIND_PORT: '19130' });
+  for (const bindings of Object.values(n.PortBindings)) assert.equal(bindings[0].HostIp, '127.0.0.1');
+  assert.ok(n.Env.includes('SERVER_UDP_PORTS=127.0.0.1:19140-19239:19140-19239'));
+});

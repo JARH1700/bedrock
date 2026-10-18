@@ -18,7 +18,7 @@ https://{$BEDROCK_PUBLIC_IP:66.179.208.33}:19132 {
 			disable_tlsalpn_challenge
 		}
 	}
-	reverse_proxy host.docker.internal:19130 {
+	reverse_proxy host.docker.internal:19131 {
 		flush_interval -1
 	}
 }

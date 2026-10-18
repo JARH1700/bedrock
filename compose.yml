@@ -16,6 +16,7 @@ services:
       BEDROCK_PUBLIC_IP: ${BEDROCK_PUBLIC_IP:-66.179.208.33}
       BEDROCK_UDP_RANGE: ${BEDROCK_UDP_RANGE:-19140-19239}
       BEDROCK_SIGNAL_BIND_PORT: "19130"
+      BEDROCK_PRIVATE_NETWORK: "true"
       DATA_DIR: /data
       PANEL_DATA_DIR: /panel-data
       BACKUP_DIR: /backups
@@ -30,6 +31,34 @@ services:
       timeout: 5s
       start_period: 20s
       retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  game-mux:
+    build: ./nethernet-mux
+    network_mode: host
+    restart: unless-stopped
+    command:
+      - "-listen"
+      - "172.17.0.1:19131"
+      - "-bds"
+      - "127.0.0.1:19130"
+      - "-mux"
+      - ":19132"
+      - "-advertise-ip"
+      - "${BEDROCK_PUBLIC_IP:-66.179.208.33}"
+      - "-advertise-port"
+      - "19132"
+      - "-advertise-tcp-port"
+      - "19132"
+      - "-max-sessions"
+      - "128"
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    read_only: true
     logging:
       driver: json-file
       options:
